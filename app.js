@@ -1,4 +1,4 @@
-//Makes a get request to the treehouse API and returns the badge count and points for desired user(s)
+// When running the app, provide the usernames you wish to check as additional args
 
 const https = require('https');
 
@@ -8,32 +8,36 @@ function printMessage(username, badgeCount, points){
 	console.log(message);
 }
 
-
-//printMessage("Greg", 33, 3303);
 function getProfile(username){
-	// Connect to the API URL (https://teamtreehouse.com/username.json)
-	https.get('https://teamtreehouse.com/' + username + '.json', function(response){
-		console.log('Status code: ', response.statusCode);
+	try {
+		// Connect to the API URL
+		const request = https.get('https://teamtreehouse.com/' + username + '.json', function(response){
+			console.log('Status code: ', response.statusCode);
 
-		var body = '';
-		
-		// Read the data
-		response.on('data', function(data){
-			body += data.toString();
-		});
+			var body = '';
+			// Read the data
+			response.on('data', function(data){
+				body += data.toString();
+			});
 
-		response.on('end', function(){
-			// Parse the json data
-			const profile = JSON.parse(body);
-			//console.dir(profile);
-			// Print the data
-			printMessage(username, profile.badges.length, profile.points.JavaScript);
+			response.on('end', function(){
+				// Parse the json data
+				const profile = JSON.parse(body);
+				//console.dir(profile);
+				//console.log(profile.points.total);		
+				// Print the data
+				printMessage(username, profile.badges.length, profile.points.JavaScript);
+				
+			});
+			
 		});
-		
-	});
+		request.on('error', function(error){
+			console.error('Problem with request: ' + error.message);
+		});
+	} catch (error){
+		console.error(error.message);
+	}
 }
-
-
 
 //const users = ['gregwienecke', 'chalkers', 'alenaholligan', 'davemcfarland'];
 const users = process.argv.slice(2);
